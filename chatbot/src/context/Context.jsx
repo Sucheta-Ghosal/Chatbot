@@ -4,7 +4,6 @@ import runChat from "../config/chatbot";
 export const Context = createContext();
 
 const ContextProvider = (props) => {
-
     const [input, setInput] = useState("");
     const [recentPrompt, setRecentPrompt] = useState("");
     const [prevPrompts, setPrevPrompts] = useState([]);
@@ -13,9 +12,8 @@ const ContextProvider = (props) => {
     const [resultData, setResultData] = useState("");
 
     const [messages, setMessages] = useState([]);
-
     const [activeChatId, setActiveChatId] = useState(null); // currently active chat
-
+    const [chats, setChats] = useState([]); // all chats
 
     const [theme, setTheme] = useState("light"); // default light
 
@@ -23,10 +21,7 @@ const ContextProvider = (props) => {
         setTheme(prev => (prev === "light" ? "dark" : "light"));
     };
 
-    //added
-    const [chats, setChats] = useState([]); // all chats
-
-    // Fetch user's chats from backend (call on mount)
+    // Fetch user's chats
     const fetchChats = async (userId) => {
         try {
             const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
@@ -43,19 +38,20 @@ const ContextProvider = (props) => {
         const chat = chats.find(c => c._id === chatId);
         if (chat) setMessages(chat.messages || []);
     };
-    //added
 
+    // Create new chat
     const createNewChat = async (userId) => {
         try {
             const res = await fetch("http://localhost:5000/api/chats", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, messages: [] }) // empty chat initially
+                body: JSON.stringify({ userId, messages: [] })
             });
             const data = await res.json();
             if (data.success) {
-                setActiveChatId(data.chat._id); // set the new chat as active
-                setMessages([]); // reset messages in frontend
+                setActiveChatId(data.chat._id);
+                setMessages([]);
+                setChats(prev => [...prev, data.chat]); // add to local list
                 console.log("New chat created:", data.chat._id);
             }
         } catch (err) {
@@ -63,23 +59,20 @@ const ContextProvider = (props) => {
         }
     };
 
-
+    // Send message
     const onSent = async (prompt, userId) => {
         if (!prompt) return;
-        if (!activeChatId) {
-            console.error("No active chat selected");
-            return;
-        }
 
-        // 1️⃣ Add user's message
-        setMessages(prev => [...prev, { sender: "user", text: prompt }]);
+        // 1️⃣ Add user message locally
+        const newUserMsg = { sender: "user", text: prompt };
+        setMessages(prev => [...prev, newUserMsg]);
 
         setLoading(true);
         setShowResult(true);
 
-        const response = await runChat(input);
+        // 2️⃣ Get bot response from Gemini
+        const response = await runChat(prompt);
 
-        // 2️⃣ Format bot response
         let formattedResponse = response
             .replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>")
             .replace(/(<li>.*<\/li>)/gs, "<ol>$1</ol>")
@@ -95,25 +88,40 @@ const ContextProvider = (props) => {
                     </div>`;
             });
 
-        // 3️⃣ Add bot's response
-        const updatedMessages = [...messages, { sender: "user", text: prompt }, { sender: "bot", text: formattedResponse }];
+        const newBotMsg = { sender: "bot", text: formattedResponse };
+
+        const updatedMessages = [...messages, newUserMsg, newBotMsg];
         setMessages(updatedMessages);
 
-        // 4️⃣ Save chat to backend
         try {
-            await fetch("http://localhost:5000/api/chats", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userId,       // Pass your logged-in user's id
-                    messages: updatedMessages
-                })
-            });
+            if (activeChatId) {
+                // ✅ Append to existing chat
+                await fetch(`http://localhost:5000/api/chats/${activeChatId}/messages`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: [newUserMsg, newBotMsg] })
+                });
+            } else {
+                // ✅ Create new chat if none exists
+                const res = await fetch("http://localhost:5000/api/chats", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId,
+                        messages: [newUserMsg, newBotMsg]
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setActiveChatId(data.chat._id);
+                    setChats(prev => [...prev, data.chat]);
+                }
+            }
         } catch (err) {
             console.error("Error saving chat:", err);
         }
 
-        // 5️⃣ Typing effect
+        // Typing effect
         const chars = formattedResponse.split("");
         chars.forEach((ch, i) => {
             setTimeout(() => {
@@ -124,9 +132,6 @@ const ContextProvider = (props) => {
         setLoading(false);
         setInput("");
     };
-
-
-    //onSent("what is react js")
 
     const contextValue = {
         prevPrompts,
@@ -146,16 +151,16 @@ const ContextProvider = (props) => {
         activeChatId,
         setActiveChatId,
         createNewChat,
-        chats, 
+        chats,
         setActiveChat,
         fetchChats
-    }
+    };
 
     return (
         <Context.Provider value={contextValue}>
             {props.children}
         </Context.Provider>
-    )
-}
+    );
+};
 
-export default ContextProvider
+export default ContextProvider;

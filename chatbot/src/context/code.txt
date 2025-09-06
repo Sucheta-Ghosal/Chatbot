@@ -23,6 +23,28 @@ const ContextProvider = (props) => {
         setTheme(prev => (prev === "light" ? "dark" : "light"));
     };
 
+    //added
+    const [chats, setChats] = useState([]); // all chats
+
+    // Fetch user's chats from backend (call on mount)
+    const fetchChats = async (userId) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
+            const data = await res.json();
+            if (data.success) setChats(data.chats);
+        } catch (err) {
+            console.error("Error fetching chats:", err);
+        }
+    };
+
+    // Set active chat
+    const setActiveChat = (chatId) => {
+        setActiveChatId(chatId);
+        const chat = chats.find(c => c._id === chatId);
+        if (chat) setMessages(chat.messages || []);
+    };
+    //added
+
     const createNewChat = async (userId) => {
         try {
             const res = await fetch("http://localhost:5000/api/chats", {
@@ -123,7 +145,10 @@ const ContextProvider = (props) => {
         setMessages,
         activeChatId,
         setActiveChatId,
-        createNewChat
+        createNewChat,
+        chats, 
+        setActiveChat,
+        fetchChats
     }
 
     return (

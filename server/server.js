@@ -135,6 +135,19 @@ app.post("/api/chatbot", async (req, res) => {
     }
 });
 
+app.put("/api/chats/:chatId/messages", async (req, res) => {
+  const { chatId } = req.params;
+  const { messages } = req.body;
+
+  const chat = await Chat.findById(chatId);
+  if (!chat) return res.json({ success: false, message: "Chat not found" });
+
+  chat.messages.push(...messages);
+  await chat.save();
+
+  res.json({ success: true, chat });
+});
+
 // -------------------------
 // Start server
 // -------------------------
