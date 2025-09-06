@@ -81,6 +81,11 @@ const Main = () => {
                                     )}
                                 </div>
                             ))}
+
+                            {loading && 
+                                <Loader_2 />
+                            }
+
                         </div>
                     )
                 }
@@ -95,7 +100,7 @@ const Main = () => {
                     <div>
                         <img src={assets.gallery_icon} alt="" />
                         <img src={assets.mic_icon} alt="" />
-                        <img onClick={() => onSent(input)} src={assets.send_icon} alt="" />
+                        <img onClick={() => onSent(input,"68bc1961157ce76dde428ef4")} src={assets.send_icon} alt="" />
                     </div>
                 </div>
                 <p className="bottom-info">

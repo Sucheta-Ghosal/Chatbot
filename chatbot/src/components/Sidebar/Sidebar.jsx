@@ -6,11 +6,9 @@ import { Context } from '../../context/Context'
 const Sidebar = () => {
   const [extended, setExtended] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
-  //const [theme, setTheme] = useState("dark")  // "light" or "dark"
-  const { theme, toggleTheme } = useContext(Context); // use global theme
+  const { theme, toggleTheme, createNewChat, chats, setActiveChat, fetchChats } = useContext(Context);
 
-
-
+  const userId = "68bc1961157ce76dde428ef4"; // replace with current logged-in user ID
 
   // Inject CSS file dynamically for theme
   useEffect(() => {
@@ -26,7 +24,11 @@ const Sidebar = () => {
 
     linkTag.href = theme === "dark" ? "/Sidebar-dark-bg.css" : "/Sidebar-light-bg.css"
   }, [theme])
-  
+
+  useEffect(() => {
+    // Fetch chats when sidebar mounts
+    fetchChats(userId);
+  }, []);
 
   return (
     <div className='sidebar'>
@@ -38,17 +40,24 @@ const Sidebar = () => {
           alt="menu"
         />
 
-        <div /*onClick={newChat}*/ className="new-chat">
+        <div onClick={() => createNewChat(userId)} className="new-chat">
           <img src={assets.plus_icon} alt="new" />
           {extended ? <p>New Chat</p> : null}
         </div>
 
         <div className="recent">
           <p className="recent-title">Recent</p>
-          <div className="recent-entry">
-            <img src={assets.message_icon} alt="" />
-            <p>What is React..</p>
-          </div>
+          {chats.length === 0 && <p>No recent chats</p>}
+          {chats.map(chat => (
+            <div
+              key={chat._id}
+              className="recent-entry"
+              onClick={() => setActiveChat(chat._id)}
+            >
+              <img src={assets.message_icon} alt="" />
+              <p>{chat.messages?.[0]?.text || `Chat ${chat._id.slice(0, 6)}`}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -89,5 +98,3 @@ const Sidebar = () => {
 }
 
 export default Sidebar
-
-

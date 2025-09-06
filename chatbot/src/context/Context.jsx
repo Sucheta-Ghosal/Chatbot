@@ -14,63 +14,117 @@ const ContextProvider = (props) => {
 
     const [messages, setMessages] = useState([]);
 
+    const [activeChatId, setActiveChatId] = useState(null); // currently active chat
+
+
     const [theme, setTheme] = useState("light"); // default light
 
     const toggleTheme = () => {
         setTheme(prev => (prev === "light" ? "dark" : "light"));
     };
 
-    const onSent = async (prompt) => {
-        //if (!prompt) return;
+    //added
+    const [chats, setChats] = useState([]); // all chats
 
-        // Add user's message to messages
+    // Fetch user's chats from backend (call on mount)
+    const fetchChats = async (userId) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
+            const data = await res.json();
+            if (data.success) setChats(data.chats);
+        } catch (err) {
+            console.error("Error fetching chats:", err);
+        }
+    };
+
+    // Set active chat
+    const setActiveChat = (chatId) => {
+        setActiveChatId(chatId);
+        const chat = chats.find(c => c._id === chatId);
+        if (chat) setMessages(chat.messages || []);
+    };
+    //added
+
+    const createNewChat = async (userId) => {
+        try {
+            const res = await fetch("http://localhost:5000/api/chats", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, messages: [] }) // empty chat initially
+            });
+            const data = await res.json();
+            if (data.success) {
+                setActiveChatId(data.chat._id); // set the new chat as active
+                setMessages([]); // reset messages in frontend
+                console.log("New chat created:", data.chat._id);
+            }
+        } catch (err) {
+            console.error("Error creating new chat:", err);
+        }
+    };
+
+
+    const onSent = async (prompt, userId) => {
+        if (!prompt) return;
+        if (!activeChatId) {
+            console.error("No active chat selected");
+            return;
+        }
+
+        // 1️⃣ Add user's message
         setMessages(prev => [...prev, { sender: "user", text: prompt }]);
-        //setRecentPrompt(input)
 
-        //setInput(""); // clear input
-        //setResultData("")
-        setLoading(true)
-        setShowResult(true)
+        setLoading(true);
+        setShowResult(true);
 
-        const response = await runChat(input)
+        const response = await runChat(input);
 
-        //Formatting Response
+        // 2️⃣ Format bot response
         let formattedResponse = response
-            // Ordered lists (1., 2., etc.)
             .replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>")
             .replace(/(<li>.*<\/li>)/gs, "<ol>$1</ol>")
-
-            // Unordered lists (- or *)
             .replace(/^[\-\*]\s+(.*)$/gm, "<li>$1</li>")
             .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
-            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // bold
-            .replace(/\*/g, "<br/>") // line breaks
+            .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+            .replace(/\*/g, "<br/>")
             .replace(/```([\s\S]*?)```/g, (match, code) => {
-                // Escape HTML so <h1> shows as text, not HTML
                 const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 return `<div class="code-block">
-              <div class="code-header">💻 Code Snippet</div>
-              <pre><code>${escapedCode}</code></pre>
-            </div>`;
+                        <div class="code-header">💻 Code Snippet</div>
+                        <pre><code>${escapedCode}</code></pre>
+                    </div>`;
             });
-        //setResultData(formattedResponse);
 
-        //Add bot's message to messages
-        setMessages(prev => [...prev, { sender: "bot", text: formattedResponse }]);
+        // 3️⃣ Add bot's response
+        const updatedMessages = [...messages, { sender: "user", text: prompt }, { sender: "bot", text: formattedResponse }];
+        setMessages(updatedMessages);
 
-        // Split the response into characters (or words) for typing effect
+        // 4️⃣ Save chat to backend
+        try {
+            await fetch("http://localhost:5000/api/chats", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId,       // Pass your logged-in user's id
+                    messages: updatedMessages
+                })
+            });
+        } catch (err) {
+            console.error("Error saving chat:", err);
+        }
+
+        // 5️⃣ Typing effect
         const chars = formattedResponse.split("");
-
-        // Typing effect
         chars.forEach((ch, i) => {
             setTimeout(() => {
                 setResultData(prev => prev + ch);
-            }, 20 * i); // 20ms per char → adjust for speed
+            }, 20 * i);
         });
 
-        setLoading(false)
-        setInput("")
-    }
+        setLoading(false);
+        setInput("");
+    };
+
 
     //onSent("what is react js")
 
@@ -88,7 +142,13 @@ const ContextProvider = (props) => {
         theme,
         toggleTheme,
         messages,
-        setMessages
+        setMessages,
+        activeChatId,
+        setActiveChatId,
+        createNewChat,
+        chats, 
+        setActiveChat,
+        fetchChats
     }
 
     return (
