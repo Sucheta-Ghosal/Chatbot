@@ -1,0 +1,43 @@
+{extended && (
+          <div className="recent">
+            <p className='recent-title'>Recent</p>
+
+            {chats.map((chat) => (
+              <div
+                key={chat.chatId}
+                onClick={() => setActiveChat(chat.chatId)}
+                className={`recent-entry ${activeChat === chat.chatId ? "active" : ""}`}
+              >
+                <img src={assets.message_icon} alt="msg" />
+                <p>{chat.chatId.slice(0, 18)} ...</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+
+
+
+        const { 
+    chats, 
+    newChat, 
+    activeChat, 
+    setActiveChat, 
+    theme, 
+    toggleTheme 
+  } = useContext(Context)
+
+  // Inject CSS file dynamically for theme
+  useEffect(() => {
+    const linkId = "sidebar-theme-style"
+    let linkTag = document.getElementById(linkId)
+
+    if (!linkTag) {
+      linkTag = document.createElement("link")
+      linkTag.id = linkId
+      linkTag.rel = "stylesheet"
+      document.head.appendChild(linkTag)
+    }
+
+    linkTag.href = theme === "light" ? "/Sidebar-light-bg.css" : "/Sidebar-dark-bg.css"
+  }, [theme])

@@ -1,0 +1,222 @@
+import React, { useContext } from 'react'
+import './Main.css'
+import { assets } from '../../assets/assets'
+//import { Context } from '../../context/Context'
+import Loader_2 from '../Loader_2/Loader_2'
+
+const Main = () => {
+
+    //const { onSent, recentPrompt, showResult, loading, resultData, setInput, input } = useContext(Context)
+
+    return (
+        <div className='main'>
+            <div className="nav">
+                <p>ChatBot</p>
+                <img src={assets.user_icon} alt="" />
+            </div>
+            <div className="main-container">
+
+                {!showResult
+                    ? <>
+                        <div className="greet">
+                            <p><span>Hello, Dev..</span></p>
+                            <p>How can I help you today?</p>
+                        </div>
+                        <div className="cards">
+                            <div className="card">
+                                <p>Tell me about ISRO’s latest missions</p>
+                                <img src={assets.compass_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Briefly summarize this concept: urban planning</p>
+                                <img src={assets.bulb_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Brainstorm team bonding activities for our work retreat</p>
+                                <img src={assets.message_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Improve the readability of the following code</p>
+                                <img src={assets.code_icon} alt="" />
+                            </div>
+                        </div>
+
+                    </>
+                    :
+                    <div className='result'>
+                        <div className="result-title">
+                            <img src={assets.user_icon} alt="" />
+                            <p>{recentPrompt}</p>
+                        </div>
+                        <div className="result-data">
+                            <img src={assets.rocket_icon} alt="" />
+                            {loading ? (
+                                <Loader_2 />
+                            ) : (
+                                <div
+                                    className="response-text"
+                                    dangerouslySetInnerHTML={{ __html: resultData }}
+                                />
+                            )}
+                        </div>
+
+
+                    </div>
+                }
+
+
+
+                <div className="main-bottom">
+                    <div className="search-box">
+                        <input onChange={(e) => setInput(e.target.value)} value={input} type="text" placeholder='Enter a prompt here..' />
+                        <div>
+                            <img src={assets.gallery_icon} alt="" />
+                            <img src={assets.mic_icon} alt="" />
+                            {input ? <img onClick={() => onSent()} src={assets.send_icon} alt="" /> : null}
+                        </div>
+                    </div>
+                    <p className="bottom-info">
+                        ChatBot may display inaccurate info, including about people, so double-check it's responses. Your privacy and ChatBot Apps.
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Main
+
+/*
+import React, { useContext, useEffect } from 'react'
+import { assets } from '../../assets/assets'
+import { Context } from '../../context/Context'
+import Loader_2 from '../Loader_2/Loader_2'
+
+
+const Main = () => {
+    const {
+        onSent,
+        recentPrompt,
+        showResult,
+        loading,
+        resultData,
+        setInput,
+        input,
+        theme, // 👈 theme from context
+        newChat,
+        getActiveChat,
+        activeChatId
+    } = useContext(Context)
+
+
+    //new changes
+    const activeChat = getActiveChat();
+    const messages = activeChat?.messages || [];
+    //till here
+
+
+    // 🔥 Dynamically load correct CSS from public folder
+    useEffect(() => {
+        const linkId = "main-theme-css"
+        let linkEl = document.getElementById(linkId)
+
+        if (!linkEl) {
+            linkEl = document.createElement("link")
+            linkEl.id = linkId
+            linkEl.rel = "stylesheet"
+            document.head.appendChild(linkEl)
+        }
+
+        // Switch between light and dark theme CSS files
+        linkEl.href = theme === "dark" ? "/main-dark-bg.css" : "/main-light-bg.css"
+    }, [theme])
+
+    return (
+        <div className="main">
+            <div className="nav">
+                <p>ChatBot</p>
+                <img src={assets.user_icon} alt="" />
+            </div>
+            <div className="main-container">
+                {messages.length === 0  ? (
+                    <>
+                        <div className="greet">
+                            <p><span>Hello, Dev..</span></p>
+                            <p>How can I help you today?</p>
+                        </div>
+                        <div className="cards">
+                            <div className="card">
+                                <p>Tell me about ISRO’s latest missions</p>
+                                <img src={assets.compass_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Briefly summarize this concept: urban planning</p>
+                                <img src={assets.bulb_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Brainstorm team bonding activities for our work retreat</p>
+                                <img src={assets.message_icon} alt="" />
+                            </div>
+                            <div className="card">
+                                <p>Improve the readability of the following code</p>
+                                <img src={assets.code_icon} alt="" />
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="chat-history">
+                        {messages.map((msg, i) => (
+                            <div key={i} className="result">
+                                {msg.sender === "user" ? (
+                                    <div className="result-title">
+                                        <img src={assets.user_icon} alt="user" />
+                                        <p>{msg.text}</p>
+                                    </div>
+                                ) : (
+                                    <div className="result-data">
+                                        <img src={assets.rocket_icon} alt="bot" />
+                                        <div
+                                            className="response-text"
+                                            dangerouslySetInnerHTML={{ __html: msg.text }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        {loading && (
+                            <div className="result-data loading-response">
+                                <Loader_2 />
+                            </div>
+                        )}
+                    </div>
+
+                )}
+
+                <div className="main-bottom">
+                    <div className="search-box">
+                        <input
+                            onChange={(e) => setInput(e.target.value)}
+                            value={input}
+                            type="text"
+                            placeholder="Enter a prompt here.."
+                        />
+                        <div>
+                            <img src={assets.gallery_icon} alt="" />
+                            <img src={assets.mic_icon} alt="" />
+                            {input ? (
+                                <img onClick={() => onSent()} src={assets.send_icon} alt="" />
+                            ) : null}
+                        </div>
+                    </div>
+                    <p className="bottom-info">
+                        ChatBot may display inaccurate info, including about people, so double-check its responses. Your privacy and ChatBot Apps.
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Main
+*/

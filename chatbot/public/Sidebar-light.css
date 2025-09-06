@@ -1,0 +1,120 @@
+.sidebar{
+    min-height: 100vh;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #f0f4f9;
+    padding: 25px 15px;
+}
+
+.sidebar img{
+    width: 20px;
+}
+
+.sidebar .menu{
+    display: block;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.sidebar .new-chat{
+    margin-top: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background-color: #e6eaf1;
+    border-radius: 50px;
+    font-size: 14px;
+    color: grey;
+    cursor: pointer;
+}
+
+.sidebar .recent{
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 1.5s;
+}
+
+.sidebar .recent-title{
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.sidebar .recent-entry{
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    padding: 10px;
+    padding-right: 40px;
+    border-radius: 50px;
+    color: #282828;
+    cursor: pointer;
+}
+
+.sidebar .recent-entry:hover{
+    background-color: #e2e6eb;
+}
+
+.sidebar .bottom{
+    margin-top: auto; /* keeps bottom items always at the bottom */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .bottom-item{
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+.settings-panel {
+    padding: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #ccc;
+    background-color: #f8f9fb;
+    border-radius: 12px;
+}
+
+.settings-option {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* space between label and options */
+}
+
+.settings-option > div {
+    display: flex;
+    flex-direction: column; /* stack options vertically */
+    gap: 5px; /* spacing between options */
+}
+
+.settings-option span {
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.settings-option span:hover {
+    background-color: #e0e7ff;
+}
+
+.settings-option span.active {
+    background-color: #e2e6eb;
+    color: black;
+    font-weight: bold;
+}
+
+.settings-option label {
+    font-weight: 500;
+}
+
+.settings-option .theme-options {
+    background-color: #f0f4f9;
+    border-radius: 50px;
+}
+
+@media (max-width: 600px) {
+    .sidebar{
+        display: none;
+    }
+}

@@ -1,0 +1,97 @@
+.solar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  width: 500px;
+  height: 500px;
+}
+
+.sun {
+  font-size: 60px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+.orbit {
+  position: absolute;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  animation: rotate linear infinite;
+}
+
+.planet {
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
+  font-size: 22px;
+}
+
+/* Orbits (size + speed) */
+.mercury-orbit {
+  width: 80px;
+  height: 80px;
+  animation-duration: 3s;
+}
+
+.venus-orbit {
+  width: 120px;
+  height: 120px;
+  animation-duration: 6s;
+}
+
+.earth-orbit {
+  width: 160px;
+  height: 160px;
+  animation-duration: 9s;
+}
+
+.mars-orbit {
+  width: 200px;
+  height: 200px;
+  animation-duration: 12s;
+}
+
+.jupiter-orbit {
+  width: 260px;
+  height: 260px;
+  animation-duration: 20s;
+}
+
+.saturn-orbit {
+  width: 320px;
+  height: 320px;
+  animation-duration: 25s;
+}
+
+.uranus-orbit {
+  width: 380px;
+  height: 380px;
+  animation-duration: 30s;
+}
+
+.neptune-orbit {
+  width: 440px;
+  height: 440px;
+  animation-duration: 35s;
+}
+
+/* Animations */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  position: absolute;
+  bottom: -30px;
+  font-size: 18px;
+  color: #444;
+  font-family: "Arial", sans-serif;
+}
