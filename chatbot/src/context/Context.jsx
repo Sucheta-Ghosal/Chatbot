@@ -12,6 +12,8 @@ const ContextProvider = (props) => {
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
 
+    const [messages, setMessages] = useState([]);
+
     const [theme, setTheme] = useState("light"); // default light
 
     const toggleTheme = () => {
@@ -19,8 +21,14 @@ const ContextProvider = (props) => {
     };
 
     const onSent = async (prompt) => {
+        //if (!prompt) return;
 
-        setResultData("")
+        // Add user's message to messages
+        setMessages(prev => [...prev, { sender: "user", text: prompt }]);
+        //setRecentPrompt(input)
+
+        //setInput(""); // clear input
+        //setResultData("")
         setLoading(true)
         setShowResult(true)
 
@@ -46,6 +54,9 @@ const ContextProvider = (props) => {
             </div>`;
             });
         //setResultData(formattedResponse);
+
+        //Add bot's message to messages
+        setMessages(prev => [...prev, { sender: "bot", text: formattedResponse }]);
 
         // Split the response into characters (or words) for typing effect
         const chars = formattedResponse.split("");
@@ -75,7 +86,9 @@ const ContextProvider = (props) => {
         input,
         setInput,
         theme,
-        toggleTheme
+        toggleTheme,
+        messages,
+        setMessages
     }
 
     return (
