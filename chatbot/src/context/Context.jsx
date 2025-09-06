@@ -11,7 +11,12 @@ const ContextProvider = (props) => {
     const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
-    //const [messages, setMessages] = useState([]); // store both text & images
+
+    const [theme, setTheme] = useState("light"); // default light
+
+    const toggleTheme = () => {
+        setTheme(prev => (prev === "light" ? "dark" : "light"));
+    };
 
     const onSent = async (prompt) => {
 
@@ -68,7 +73,9 @@ const ContextProvider = (props) => {
         loading,
         resultData,
         input,
-        setInput
+        setInput,
+        theme,
+        toggleTheme
     }
 
     return (

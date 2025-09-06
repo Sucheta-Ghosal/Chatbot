@@ -1,20 +1,19 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { assets } from '../../assets/assets'
-//import { Context } from '../../context/Context'
-import './Sidebar.css';
+import { Context } from '../../context/Context'
+//import './Sidebar.css';
 
 const Sidebar = () => {
   const [extended, setExtended] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
-  const [theme, setTheme] = useState("dark")  // "light" or "dark"
+  //const [theme, setTheme] = useState("dark")  // "light" or "dark"
+  const { theme, toggleTheme } = useContext(Context); // use global theme
 
-  const toggleTheme = () => {
-  setTheme(prev => (prev === "dark" ? "light" : "dark"))
-}
+
 
 
   // Inject CSS file dynamically for theme
-  /*useEffect(() => {
+  useEffect(() => {
     const linkId = "sidebar-theme-style"
     let linkTag = document.getElementById(linkId)
 
@@ -27,7 +26,7 @@ const Sidebar = () => {
 
     linkTag.href = theme === "dark" ? "/Sidebar-dark-bg.css" : "/Sidebar-light-bg.css"
   }, [theme])
-  */
+  
 
   return (
     <div className='sidebar'>

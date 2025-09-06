@@ -1,12 +1,27 @@
-import React, { useContext } from 'react'
-import './Main.css'
+import React, { useContext,useEffect,useState } from 'react'
+//import './Main.css'
 import { assets } from '../../assets/assets'
 import { Context } from '../../context/Context'
 import Loader_2 from '../Loader_2/Loader_2'
 
 const Main = () => {
 
-    const { onSent, recentPrompt, showResult, loading, resultData, setInput, input } = useContext(Context)
+    const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, theme, toggleTheme } = useContext(Context)
+
+    useEffect(() => {
+        const linkId = "main-theme-css"
+        let linkEl = document.getElementById(linkId)
+
+        if (!linkEl) {
+            linkEl = document.createElement("link")
+            linkEl.id = linkId
+            linkEl.rel = "stylesheet"
+            document.head.appendChild(linkEl)
+        }
+
+        // Switch between light and dark theme CSS files
+        linkEl.href = theme === "dark" ? "/main-dark-bg.css" : "/main-light-bg.css"
+    }, [theme])
 
     return (
         <div className='main'>
@@ -16,56 +31,56 @@ const Main = () => {
             </div>
             <div className="main-container">
 
-                {!showResult 
+                {!showResult
                     ? (
-                    <>
-                        <div className="greet">
-                            <p><span>Hello, Dev..</span></p>
-                            <p>How can I help you today?</p>
-                        </div>
-                        <div className="cards">
-                            <div className="card">
-                                <p>Tell me about ISRO’s latest missions</p>
-                                <img src={assets.compass_icon} alt="" />
+                        <>
+                            <div className="greet">
+                                <p><span>Hello, Dev..</span></p>
+                                <p>How can I help you today?</p>
                             </div>
-                            <div className="card">
-                                <p>Briefly summarize this concept: urban planning</p>
-                                <img src={assets.bulb_icon} alt="" />
+                            <div className="cards">
+                                <div className="card">
+                                    <p>Tell me about ISRO’s latest missions</p>
+                                    <img src={assets.compass_icon} alt="" />
+                                </div>
+                                <div className="card">
+                                    <p>Briefly summarize this concept: urban planning</p>
+                                    <img src={assets.bulb_icon} alt="" />
+                                </div>
+                                <div className="card">
+                                    <p>Brainstorm team bonding activities for our work retreat</p>
+                                    <img src={assets.message_icon} alt="" />
+                                </div>
+                                <div className="card">
+                                    <p>Improve the readability of the following code</p>
+                                    <img src={assets.code_icon} alt="" />
+                                </div>
                             </div>
-                            <div className="card">
-                                <p>Brainstorm team bonding activities for our work retreat</p>
-                                <img src={assets.message_icon} alt="" />
-                            </div>
-                            <div className="card">
-                                <p>Improve the readability of the following code</p>
-                                <img src={assets.code_icon} alt="" />
-                            </div>
-                        </div>
 
-                    </>
+                        </>
                     )
                     :
                     (
-                    <div className='result'>
-                        <div className="result-title">
-                            <img src={assets.user_icon} alt="" />
-                            <p>{recentPrompt}</p>
-                        </div>
-                        <div className="result-data">
-                            <img src={assets.rocket_icon} alt="" />
-                            {loading ? (
-                                <Loader_2 />
-                            ) : (
-                                <div
-                                    className="response-text"
-                                    dangerouslySetInnerHTML={{ __html: resultData }}
-                                />
-                            )}
-                        </div>
+                        <div className='result'>
+                            <div className="result-title">
+                                <img src={assets.user_icon} alt="" />
+                                <p>{recentPrompt}</p>
+                            </div>
+                            <div className="result-data">
+                                <img src={assets.rocket_icon} alt="" />
+                                {loading ? (
+                                    <Loader_2 />
+                                ) : (
+                                    <div
+                                        className="response-text"
+                                        dangerouslySetInnerHTML={{ __html: resultData }}
+                                    />
+                                )}
+                            </div>
 
 
-                    </div>
-                )}
+                        </div>
+                    )}
 
 
 
