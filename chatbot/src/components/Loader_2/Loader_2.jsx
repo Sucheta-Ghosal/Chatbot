@@ -32,8 +32,7 @@ const Loader_2 = () => {
       </div>
 
       
-
-      <p className="loading-text">Exploring the universe...</p>
+      {/*<p className="loading-text">Exploring the universe...</p>*/}
     </div>
   );
 };

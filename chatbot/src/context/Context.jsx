@@ -1,5 +1,6 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 import runChat from "../config/chatbot";
+
 
 export const Context = createContext();
 
@@ -16,10 +17,51 @@ const ContextProvider = (props) => {
     const [chats, setChats] = useState([]); // all chats
 
     const [theme, setTheme] = useState("light"); // default light
+   
+    const userId = "68bc1961157ce76dde428ef4";
 
     const toggleTheme = () => {
         setTheme(prev => (prev === "light" ? "dark" : "light"));
     };
+
+    useEffect(() => {
+        const initChats = async () => {
+            try {
+                const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    setChats(data.chats);
+
+                    if (data.chats.length > 0) {
+                        // ✅ pick the latest chat
+                        const lastChat = data.chats[data.chats.length - 1];
+                        setActiveChatId(lastChat._id);
+                        setMessages(lastChat.messages || []);
+                    } else {
+                        // ✅ no chats → create a new one immediately
+                        const newChatRes = await fetch("http://localhost:5000/api/chats", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ userId, messages: [] }),
+                        });
+
+                        const newChatData = await newChatRes.json();
+                        if (newChatData.success) {
+                            setChats([newChatData.chat]);
+                            setActiveChatId(newChatData.chat._id);
+                            setMessages([]);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error initializing chats:", err);
+            }
+        };
+
+        initChats();
+    }, [userId]);
+
 
     // Fetch user's chats
     const fetchChats = async (userId) => {

@@ -60,6 +60,8 @@
     margin-top: auto; /* keeps bottom items always at the bottom */
     display: flex;
     flex-direction: column;
+    position: sticky;
+    bottom: 0px;
 }
 
 .sidebar .bottom-item{
@@ -73,6 +75,10 @@
     border-top: 1px solid #ccc;
     background-color: #f8f9fb;
     border-radius: 12px;
+    position: sticky;
+    bottom: 20px;
+    left: 120px;
+    max-width: 120px;
 }
 
 .settings-option {
