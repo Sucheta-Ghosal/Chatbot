@@ -17,8 +17,12 @@ const ContextProvider = (props) => {
     const [chats, setChats] = useState([]); // all chats
 
     const [theme, setTheme] = useState("light"); // default light
-   
-    const userId = "68bc1961157ce76dde428ef4";
+
+    //const userId = "68bc1961157ce76dde428ef4";
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = storedUser?._id;
+    const token = localStorage.getItem("token");
+
 
     const toggleTheme = () => {
         setTheme(prev => (prev === "light" ? "dark" : "light"));
@@ -27,7 +31,9 @@ const ContextProvider = (props) => {
     useEffect(() => {
         const initChats = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
+                const res = await fetch(`http://localhost:5000/api/chats`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
                 const data = await res.json();
 
                 if (data.success) {
@@ -42,8 +48,11 @@ const ContextProvider = (props) => {
                         // ✅ no chats → create a new one immediately
                         const newChatRes = await fetch("http://localhost:5000/api/chats", {
                             method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ userId, messages: [] }),
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ messages: [] }),
                         });
 
                         const newChatData = await newChatRes.json();
@@ -64,9 +73,11 @@ const ContextProvider = (props) => {
 
 
     // Fetch user's chats
-    const fetchChats = async (userId) => {
+    const fetchChats = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/api/chats/${userId}`);
+            const res = await fetch(`http://localhost:5000/api/chats`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.success) setChats(data.chats);
         } catch (err) {
@@ -75,19 +86,65 @@ const ContextProvider = (props) => {
     };
 
     // Set active chat
-    const setActiveChat = (chatId) => {
+    /*const setActiveChat = async (chatId) => {
         setActiveChatId(chatId);
-        const chat = chats.find(c => c._id === chatId);
+
+        // Try to find in local state
+        let chat = chats.find(c => c._id === chatId);
+
+        if (!chat) {
+            try {
+                const res = await fetch(`http://localhost:5000/api/chats/${chatId}`, {
+                    headers: { "Authorization": `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (data.success) chat = data.chat;
+            } catch (err) {
+                console.error("Error fetching chat:", err);
+            }
+        }
+
         if (chat) setMessages(chat.messages || []);
+    };*/
+
+    const setActiveChat = async (chatId) => {
+        // Update the currently active chat immediately
+        setActiveChatId(chatId);
+
+        // Find chat in local state
+        const localChat = chats.find(c => c._id === chatId);
+
+        if (localChat) {
+            setMessages(localChat.messages || []);
+            return;
+        }
+
+        // Fetch from server only if not in local state
+        try {
+            const res = await fetch(`http://localhost:5000/api/chats/${chatId}`, {
+                headers: { "Authorization": `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.success) {
+                setMessages(data.chat.messages || []);
+            }
+        } catch (err) {
+            console.error("Error fetching chat:", err);
+        }
     };
 
+
+
     // Create new chat
-    const createNewChat = async (userId) => {
+    const createNewChat = async () => {
         try {
             const res = await fetch("http://localhost:5000/api/chats", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, messages: [] })
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ messages: [] })
             });
             const data = await res.json();
             if (data.success) {
@@ -102,7 +159,7 @@ const ContextProvider = (props) => {
     };
 
     // Send message
-    const onSent = async (prompt, userId) => {
+    const onSent = async (prompt) => {
         if (!prompt) return;
 
         // 1️⃣ Add user message locally
@@ -125,31 +182,36 @@ const ContextProvider = (props) => {
             .replace(/```([\s\S]*?)```/g, (match, code) => {
                 const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 return `<div class="code-block">
-                        <div class="code-header">💻 Code Snippet</div>
-                        <pre><code>${escapedCode}</code></pre>
-                    </div>`;
+                    <div class="code-header">💻 Code Snippet</div>
+                    <pre><code>${escapedCode}</code></pre>
+                </div>`;
             });
 
         const newBotMsg = { sender: "bot", text: formattedResponse };
 
-        const updatedMessages = [...messages, newUserMsg, newBotMsg];
-        setMessages(updatedMessages);
+        // ✅ Use functional update to append bot message safely
+        setMessages(prev => [...prev, newBotMsg]);
 
         try {
             if (activeChatId) {
-                // ✅ Append to existing chat
+                // Append to existing chat
                 await fetch(`http://localhost:5000/api/chats/${activeChatId}/messages`, {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify({ messages: [newUserMsg, newBotMsg] })
                 });
             } else {
-                // ✅ Create new chat if none exists
+                // Create new chat if none exists
                 const res = await fetch("http://localhost:5000/api/chats", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify({
-                        userId,
                         messages: [newUserMsg, newBotMsg]
                     })
                 });
@@ -174,6 +236,7 @@ const ContextProvider = (props) => {
         setLoading(false);
         setInput("");
     };
+
 
     const contextValue = {
         prevPrompts,

@@ -8,7 +8,10 @@ const Sidebar = () => {
   const [showSettings, setShowSettings] = useState(false)
   const { theme, toggleTheme, createNewChat, chats, setActiveChat, fetchChats } = useContext(Context);
 
-  const userId = "68bc1961157ce76dde428ef4"; // replace with current logged-in user ID
+  //const userId = "68bc1961157ce76dde428ef4"; // replace with current logged-in user ID
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?._id;
 
   // Inject CSS file dynamically for theme
   useEffect(() => {
@@ -26,8 +29,7 @@ const Sidebar = () => {
   }, [theme])
 
   useEffect(() => {
-    // Fetch chats when sidebar mounts
-    fetchChats(userId);
+    fetchChats();
   }, []);
 
   return (
@@ -40,15 +42,17 @@ const Sidebar = () => {
           alt="menu"
         />
 
-        <div onClick={() => createNewChat(userId)} className="new-chat">
+        <div onClick={() => createNewChat()} className="new-chat">
           <img src={assets.plus_icon} alt="new" />
           {extended ? <p>New Chat</p> : null}
         </div>
 
         <div className="recent">
           <p className="recent-title">Recent</p>
-          {chats.length === 0 && <p>No recent chats</p>}
-          {chats.map(chat => (
+          {/*chats.length === 0 && <p>No recent chats</p>*/}
+          {/* Safe check: chats may be undefined initially */}
+          {(!chats || chats.length === 0) && <p>No recent chats</p>}
+          {chats?.map(chat => (
             <div
               key={chat._id}
               className="recent-entry"
