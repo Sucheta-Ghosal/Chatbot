@@ -97,7 +97,7 @@ const Main = () => {
             < div className="main-bottom">
                 <div className="search-box">
                     <input onChange={(e) => setInput(e.target.value)} value={input} type="text" placeholder='Enter a prompt here..' />
-                    <div>
+                    <div className="search-box-icons">
                         <img src={assets.gallery_icon} alt="" />
                         <img src={assets.mic_icon} alt="" />
                         <img onClick={() => onSent(input)} src={assets.send_icon} alt="" />
