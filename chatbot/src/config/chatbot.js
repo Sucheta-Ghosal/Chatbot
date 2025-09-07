@@ -54,6 +54,7 @@ async function runChat(prompt) {
       const fileExtension = mime.getExtension(inlineData.mimeType || '') || 'bin';
       const buffer = Uint8Array.from(atob(inlineData.data || ''), c => c.charCodeAt(0));
       saveBinaryFile(`${fileName}.${fileExtension}`, buffer, inlineData.mimeType);
+      console.log("this is index",`${fileIndex}`);
     } else {
       result += chunk.text || ""; 
       console.log(chunk.text);

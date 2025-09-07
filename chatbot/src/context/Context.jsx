@@ -172,20 +172,55 @@ const ContextProvider = (props) => {
         // 2️⃣ Get bot response from Gemini
         const response = await runChat(prompt);
 
+        // let formattedResponse = response
+        //     .replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>")
+        //     .replace(/(<li>.*<\/li>)/gs, "<ol>$1</ol>")
+        //     .replace(/^[\-\*]\s+(.*)$/gm, "<li>$1</li>")
+        //     .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+        //     .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+        //     .replace(/\*/g, "<br/>")
+        //     .replace(/```([\s\S]*?)```/g, (match, code) => {
+        //         const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        //         return `<div class="code-block">
+        //             <div class="code-header">💻 Code Snippet</div>
+        //             <pre><code>${escapedCode}</code></pre>
+        //         </div>`;
+        //     });
+
+        let imageCount = 0;
+
+        // Replace image URLs or markdown images with actual <img> tags
         let formattedResponse = response
+            // Replace numbered lists
             .replace(/^\d+\.\s+(.*)$/gm, "<li>$1</li>")
             .replace(/(<li>.*<\/li>)/gs, "<ol>$1</ol>")
+            // Replace bullet lists
             .replace(/^[\-\*]\s+(.*)$/gm, "<li>$1</li>")
             .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+            // Bold text
             .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+            // Line breaks
             .replace(/\*/g, "<br/>")
+            // Code blocks
             .replace(/```([\s\S]*?)```/g, (match, code) => {
                 const escapedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 return `<div class="code-block">
-                    <div class="code-header">💻 Code Snippet</div>
-                    <pre><code>${escapedCode}</code></pre>
+              <div class="code-header">💻 Code Snippet</div>
+              <pre><code>${escapedCode}</code></pre>
+            </div>`;
+            })
+            // Replace image markdown or URLs with <img> tags
+            .replace(/!\[.*?\]\((.*?)\)|https?:\/\/\S+\.(jpg|jpeg|png|gif|webp)/gi, (match, url) => {
+                imageCount++;
+                // If markdown syntax, `url` will capture the link
+                const imageUrl = url || match;
+                return `<div class="bot-image">
+                  <p>[Image ${imageCount}]</p>
+                  <img src="${imageUrl}" alt="Image ${imageCount}" />
                 </div>`;
             });
+
+        console.log("this is image count", imageCount);
 
         const newBotMsg = { sender: "bot", text: formattedResponse };
 

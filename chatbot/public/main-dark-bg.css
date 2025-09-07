@@ -5,10 +5,13 @@
     position: relative;
     background-color: #121212; /* dark background */
     color: #e0e0e0; /* default light text */
-    overflow: auto
+    overflow: auto;
+    overflow-y: scroll;
 }
 
 .main .nav {
+    position: sticky;
+    top: 0px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -79,12 +82,13 @@
 }
 
 .main-bottom {
-    position: absolute;
+    position: fixed;       /* Stick to viewport bottom */
     bottom: 0;
-    width: 100%;
-    /*max-width: 900px;*/
     padding: 0px 20px;
     margin: auto;
+    box-sizing: border-box;
+    background-color: #121212;
+    z-index: 100;
 }
 
 .search-box {
@@ -147,6 +151,11 @@
 }
 
 .result::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+.main::-webkit-scrollbar {
     display: none;
 }
 
